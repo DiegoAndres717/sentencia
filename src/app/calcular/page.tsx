@@ -1,5 +1,6 @@
 "use client";
-import { Delito } from '@/types';
+import { Pena } from '@/types';
+import { delitos, filtrarDelitos } from '@/utils';
 import React, { useState } from 'react';
 
 type Agravante = string; 
@@ -9,9 +10,42 @@ const Calculate = () => {
   const [selectedDelito, setSelectedDelito] = useState('');
   const [agravantes, setAgravantes] = useState<Agravante[]>([]);
   const [atenuantes, setAtenuantes] = useState<Atenuante[]>([]);
+  const [resultadoPena, setResultadoPena] = useState<Pena | null>(null); 
+  const [selectedTipoDelito, setSelectedTipoDelito] = useState("");
+  const [selectedGravedad, setSelectedGravedad] = useState("");
+  const [delitosFiltrados, setDelitosFiltrados] = useState(delitos); 
+  
+  const handleTipoDelitoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTipoDelito(event.target.value);
+    setDelitosFiltrados(filtrarDelitos(event.target.value, selectedGravedad)); 
+  };
+
+  const handleGravedadChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedGravedad(event.target.value);
+    setDelitosFiltrados(filtrarDelitos(selectedTipoDelito, event.target.value)); 
+  };
 
   const handleDelitoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedDelito(event.target.value);
+    const selectedValue = event.target.value; 
+    
+    // Filtra la lista de delitos basados en el tipo y gravedad
+    const delitosFiltrados = delitos.filter((d) => {
+      if (selectedTipoDelito && d.tipoDelito !== selectedTipoDelito) {
+        return false;
+      }
+      if (selectedGravedad && d.gravedad !== selectedGravedad) {
+        return false;
+      }
+      return true;
+    });
+  
+    // Encuentra el delito seleccionado en la lista filtrada
+    const delitoSeleccionado = delitosFiltrados.find(
+      (d) => d.nombreDelito === selectedValue
+    );
+  
+    // Si se encuentra, actualiza selectedDelito. Si no, selecciona el primer delito
+    setSelectedDelito(delitoSeleccionado ? selectedValue : ""); 
   };
 
   const handleAgravantesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,38 +58,11 @@ const Calculate = () => {
 
   const handleAtenuantesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      setAtenuantes([...atenuantes, event.target.value as Atenuante]);
+      setAtenuantes([...atenuantes, event.target.value]);
     } else {
       setAtenuantes(atenuantes.filter((a) => a !== event.target.value));
     }
   };
-
-  const [resultadoPena, setResultadoPena] = useState<{ penaMinima: number; penaMedia: number; penaMaxima: number, rangoPena: string } | null>(null); 
-
-  const delitos: Delito[] = [
-    {
-      nombreDelito: "Homicidio",
-      codigoDelito: "123",
-      penaBaseMinima: 10,
-      penaBaseMedia: 15,
-      penaBaseMaxima: 20
-    },
-    {
-      nombreDelito: "Robo",
-      codigoDelito: "456",
-      penaBaseMinima: 5,
-      penaBaseMedia: 8,
-      penaBaseMaxima: 12
-    },
-    {
-      nombreDelito: "Fraude",
-      codigoDelito: "789",
-      penaBaseMinima: 2,
-      penaBaseMedia: 4,
-      penaBaseMaxima: 6
-    },
-    // Agrega más delitos...
-  ];
 
   // Buscar el delito en la lista
   const delitoSeleccionado = delitos.find((d) => d.nombreDelito === selectedDelito);
@@ -125,6 +132,43 @@ const Calculate = () => {
 
         <div className="bg-white rounded-lg shadow-md p-6">
           <form className="flex flex-col space-y-6">
+          <div className="form-group">
+              <label htmlFor="tipoDelito" className="block text-gray-700 font-bold mb-2">
+                Tipo de Delito:
+              </label>
+              <select
+                id="tipoDelito"
+                value={selectedTipoDelito}
+                onChange={handleTipoDelitoChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              >
+                <option value="">Seleccione un tipo</option>
+                <option value="Crimen Organizado">Crimen Organizado</option>
+                <option value="Violencia Doméstica">Violencia Doméstica</option>
+                <option value="Crimen Informático">Crimen Informático</option>
+                <option value="Delitos contra la Propiedad">
+                  Delitos contra la Propiedad
+                </option>
+                {/* Agrega más tipos de delito */}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="gravedad" className="block text-gray-700 font-bold mb-2">
+                Gravedad:
+              </label>
+              <select
+                id="gravedad"
+                value={selectedGravedad}
+                onChange={handleGravedadChange}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              >
+                <option value="">Seleccione una gravedad</option>
+                <option value="Leve">Leve</option>
+                <option value="Grave">Grave</option>
+                <option value="Muy Grave">Muy Grave</option>
+              </select>
+            </div>
             <div className="form-group">
               <label htmlFor="delito" className="block text-gray-700 font-bold mb-2">
                 Delito:
@@ -136,7 +180,8 @@ const Calculate = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               >
                 <option value="">Seleccione un delito</option>
-                {delitos.map((delito) => (
+                {/* Mostrar la lista de delitos filtrados */}
+                {delitosFiltrados.map((delito) => (
                   <option key={delito.codigoDelito} value={delito.nombreDelito}>
                     {delito.nombreDelito}
                   </option>
@@ -148,7 +193,7 @@ const Calculate = () => {
               <label htmlFor="agravantes" className="block text-gray-700 font-bold mb-2">
                 Agravantes:
               </label>
-              <div className="space-y-2">
+              <div className="space-y-2 space-x-2">
                 <input
                   type="checkbox"
                   id="agravantes1"
@@ -177,7 +222,7 @@ const Calculate = () => {
               <label htmlFor="atenuantes" className="block text-gray-700 font-bold mb-2">
                 Atenuantes:
               </label>
-              <div className="space-y-2">
+              <div className="space-y-2 space-x-2">
                 <input
                   type="checkbox"
                   id="atenuantes1"
@@ -201,7 +246,7 @@ const Calculate = () => {
                 {/* Agrega más opciones de atenuantes */}
               </div>
             </div>
-
+          
             <button
               onClick={calcularPena}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -246,6 +291,39 @@ const Calculate = () => {
                     }
                 </div>
                 </div>
+            )}
+            {delitoSeleccionado && (
+              <div className="mt-8">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  Información del Delito:
+                </h2>
+                <div className="bg-gray-100 p-4 rounded-md">
+                  <p>
+                    <strong>Definición legal:</strong>{" "}
+                    {delitoSeleccionado.definicionLegal}
+                  </p>
+                  <p>
+                    <strong>Ejemplos:</strong>{" "}
+                    {delitoSeleccionado.ejemplos}
+                  </p>
+                  <p>
+                    <strong>Jurisprudencia:</strong>{" "}
+                    {delitoSeleccionado.jurisprudencia}
+                  </p>
+                </div>
+              </div>
+            )}
+            {resultadoPena && (
+              <div className="mt-8">
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  Explicación del Cálculo de la Pena:
+                </h2>
+                <p>
+                  La pena se calcula considerando la pena base del delito, las
+                  agravantes y las atenuantes aplicables. El rango de la pena se
+                  determina en función de la pena media y la pena máxima.
+                </p>
+              </div>
             )}
             </div>
         </div>
