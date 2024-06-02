@@ -14,6 +14,9 @@ export interface Delito {
     penaBaseMaxima: number;
     tipoDelito: string;
     gravedad: string;
+    definicionLegal?: string;
+    ejemplos?: string;
+    jurisprudencia?: string;
   }
   
   export interface Agravante {

@@ -9,7 +9,10 @@ export const delitos: Delito[] = [
     penaBaseMedia: 15,
     penaBaseMaxima: 20,
     tipoDelito: "Violencia Doméstica", // Asigna el tipo de delito
-    gravedad: "Muy Grave" // Asigna la gravedad
+    gravedad: "Muy Grave", // Asigna la gravedad
+    definicionLegal: "El homicidio es el delito que consiste en causar la muerte de una persona.",
+    ejemplos: "Ejemplos de homicidio...",
+    jurisprudencia: "Sentencias de la Corte Suprema sobre homicidio..."
   },
   {
     nombreDelito: "Robo",
@@ -142,3 +145,16 @@ export const delitos: Delito[] = [
     gravedad: "Grave"
   }
 ];
+
+// Función para filtrar la lista de delitos
+export const filtrarDelitos = (tipoDelito: string, gravedad: string) => {
+  return delitos.filter((d) => {
+    if (tipoDelito && d.tipoDelito !== tipoDelito) {
+      return false;
+    }
+    if (gravedad && d.gravedad !== gravedad) {
+      return false;
+    }
+    return true;
+  });
+};
