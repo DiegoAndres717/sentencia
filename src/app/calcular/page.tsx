@@ -1,5 +1,6 @@
 "use client";
-import { Delito } from '@/types';
+import { Pena } from '@/types';
+import { delitos } from '@/utils';
 import React, { useState } from 'react';
 
 type Agravante = string; 
@@ -9,7 +10,8 @@ const Calculate = () => {
   const [selectedDelito, setSelectedDelito] = useState('');
   const [agravantes, setAgravantes] = useState<Agravante[]>([]);
   const [atenuantes, setAtenuantes] = useState<Atenuante[]>([]);
-
+  const [resultadoPena, setResultadoPena] = useState<Pena | null>(null); 
+  
   const handleDelitoChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedDelito(event.target.value);
   };
@@ -24,38 +26,11 @@ const Calculate = () => {
 
   const handleAtenuantesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      setAtenuantes([...atenuantes, event.target.value as Atenuante]);
+      setAtenuantes([...atenuantes, event.target.value]);
     } else {
       setAtenuantes(atenuantes.filter((a) => a !== event.target.value));
     }
   };
-
-  const [resultadoPena, setResultadoPena] = useState<{ penaMinima: number; penaMedia: number; penaMaxima: number, rangoPena: string } | null>(null); 
-
-  const delitos: Delito[] = [
-    {
-      nombreDelito: "Homicidio",
-      codigoDelito: "123",
-      penaBaseMinima: 10,
-      penaBaseMedia: 15,
-      penaBaseMaxima: 20
-    },
-    {
-      nombreDelito: "Robo",
-      codigoDelito: "456",
-      penaBaseMinima: 5,
-      penaBaseMedia: 8,
-      penaBaseMaxima: 12
-    },
-    {
-      nombreDelito: "Fraude",
-      codigoDelito: "789",
-      penaBaseMinima: 2,
-      penaBaseMedia: 4,
-      penaBaseMaxima: 6
-    },
-    // Agrega más delitos...
-  ];
 
   // Buscar el delito en la lista
   const delitoSeleccionado = delitos.find((d) => d.nombreDelito === selectedDelito);
@@ -148,7 +123,7 @@ const Calculate = () => {
               <label htmlFor="agravantes" className="block text-gray-700 font-bold mb-2">
                 Agravantes:
               </label>
-              <div className="space-y-2">
+              <div className="space-y-2 space-x-2">
                 <input
                   type="checkbox"
                   id="agravantes1"
@@ -177,7 +152,7 @@ const Calculate = () => {
               <label htmlFor="atenuantes" className="block text-gray-700 font-bold mb-2">
                 Atenuantes:
               </label>
-              <div className="space-y-2">
+              <div className="space-y-2 space-x-2">
                 <input
                   type="checkbox"
                   id="atenuantes1"
